@@ -279,7 +279,7 @@ function generateQuestion(mode, tonalityId, weights, recentKeys, feelings) {
         bigAccent: true,
         sub: `${step.name} · ${step.meaning}`
       },
-      audible: false
+      audible: "chord", audibleChord: correct, autoplay: true
     };
   }
 
@@ -294,7 +294,7 @@ function generateQuestion(mode, tonalityId, weights, recentKeys, feelings) {
     return {
       mode, tonalityId, itemKey, options, correct,
       prompt: { label: "Аккорд", big: chord, sub: "В какой это ступени?" },
-      audible: false
+      audible: "chord", audibleChord: chord, autoplay: true
     };
   }
 
@@ -307,7 +307,7 @@ function generateQuestion(mode, tonalityId, weights, recentKeys, feelings) {
     return {
       mode, tonalityId, itemKey, options, correct: chord,
       prompt: { label: "Чувство", big: `«${feel}»`, sub: "Какой это аккорд?" },
-      audible: false
+      audible: "chord", audibleChord: chord, autoplay: true
     };
   }
 
@@ -321,7 +321,7 @@ function generateQuestion(mode, tonalityId, weights, recentKeys, feelings) {
     return {
       mode, tonalityId, itemKey, options, correct: correctFeel,
       prompt: { label: "Аккорд", big: chord, sub: "Какое чувство?" },
-      audible: false
+      audible: "chord", audibleChord: chord, autoplay: true
     };
   }
 
@@ -382,7 +382,7 @@ function generateQuestion(mode, tonalityId, weights, recentKeys, feelings) {
       options: ["Я вспомнил", "Не вспомнил"],
       correct: "Я вспомнил",
       prompt: { label: "Карточка", big: step.roman, bigAccent: true, sub: `Аккорд → ${correct}` },
-      audible: "chord", audibleChord: correct
+      audible: "chord", audibleChord: correct, autoplay: true
     };
   }
 

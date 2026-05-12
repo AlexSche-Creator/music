@@ -12,7 +12,7 @@ import { renderStats } from "./ui/stats.js";
 import { renderSettings } from "./ui/settings.js";
 import { kvGet } from "./core/store.js";
 import { scheduleLocalReminders, permission } from "./core/reminders.js";
-import { setTimbre } from "./core/audio.js";
+import { setTimbre, ensureCtx } from "./core/audio.js";
 
 route("/dashboard",    renderDashboard);
 route("/train",        renderTrainHub);
@@ -23,6 +23,12 @@ route("/stats",        renderStats);
 route("/settings",     renderSettings);
 
 start();
+
+/* iOS Safari only creates a running AudioContext when `new AudioContext()` is
+ * called inside a user gesture. Autoplay later (via setTimeout in training)
+ * happens outside the gesture, so the AC would otherwise start suspended and
+ * stay silent. Create the AC on the very first user click — any click counts. */
+document.addEventListener("click", () => { try { ensureCtx(); } catch {} }, { once: true });
 
 /* Service worker registration. Failures are non-fatal — the app stays usable. */
 if ("serviceWorker" in navigator) {

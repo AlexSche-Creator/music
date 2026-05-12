@@ -2,7 +2,7 @@
  * Strategy: cache-first for app shell, network-first for everything else.
  * Bump CACHE_VERSION whenever the shell changes.
  */
-const CACHE_VERSION = "music-trainer-v3";
+const CACHE_VERSION = "music-trainer-v4";
 const SHELL = [
   "./",
   "./index.html",

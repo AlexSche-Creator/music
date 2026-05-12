@@ -1,16 +1,18 @@
 /* Tiny UI helpers. We deliberately avoid a framework. */
 
-export function el(tag, attrs = {}, ...children) {
+export function el(tag, attrs, ...children) {
   const e = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (v == null || v === false) continue;
-    if (k === "class") e.className = v;
-    else if (k === "html") e.innerHTML = v;
-    else if (k === "text") e.textContent = v;
-    else if (k.startsWith("on") && typeof v === "function") e.addEventListener(k.slice(2).toLowerCase(), v);
-    else if (k === "dataset") Object.assign(e.dataset, v);
-    else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
-    else e.setAttribute(k, v);
+  if (attrs && typeof attrs === "object") {
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === "class") e.className = v;
+      else if (k === "html") e.innerHTML = v;
+      else if (k === "text") e.textContent = v;
+      else if (k.startsWith("on") && typeof v === "function") e.addEventListener(k.slice(2).toLowerCase(), v);
+      else if (k === "dataset") Object.assign(e.dataset, v);
+      else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
+      else e.setAttribute(k, v);
+    }
   }
   for (const c of children.flat()) {
     if (c == null || c === false) continue;

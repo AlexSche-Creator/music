@@ -12,7 +12,7 @@ import { renderStats } from "./ui/stats.js";
 import { renderSettings } from "./ui/settings.js";
 import { kvGet } from "./core/store.js";
 import { scheduleLocalReminders, permission } from "./core/reminders.js";
-import { setTimbre, ensureCtx } from "./core/audio.js";
+import { setTimbre, unlock } from "./core/audio.js";
 
 route("/dashboard",    renderDashboard);
 route("/train",        renderTrainHub);
@@ -24,11 +24,13 @@ route("/settings",     renderSettings);
 
 start();
 
-/* iOS Safari only creates a running AudioContext when `new AudioContext()` is
- * called inside a user gesture. Autoplay later (via setTimeout in training)
- * happens outside the gesture, so the AC would otherwise start suspended and
- * stay silent. Create the AC on the very first user click — any click counts. */
-document.addEventListener("click", () => { try { ensureCtx(); } catch {} }, { once: true });
+/* Browsers (iOS Safari, Chrome desktop & Android) create AudioContext in the
+ * "suspended" state until a user gesture triggers `resume()`. Our autoplay in
+ * training is launched from setTimeout — outside the gesture — so without an
+ * up-front resume, playback stays silent. Hook the FIRST user click on the
+ * document and explicitly `unlock()` (= ensureCtx + resume). Idempotent and
+ * cheap: it runs once, subsequent clicks no-op via `{ once: true }`. */
+document.addEventListener("click", () => { unlock().catch(() => {}); }, { once: true });
 
 /* Service worker registration. Failures are non-fatal — the app stays usable. */
 if ("serviceWorker" in navigator) {

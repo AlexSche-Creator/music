@@ -1,5 +1,5 @@
-import { listAnswers, kvGet } from "../core/store.js";
-import { summarize, perDay, heatmap, hardestByField, strongestByField, accuracyByMode, currentStreak } from "../core/stats.js";
+import { listAnswers, listSessions, kvGet } from "../core/store.js";
+import { summarize, perDay, heatmap, hardestByField, strongestByField, accuracyByMode, currentStreak, avgSessionDurationSec } from "../core/stats.js";
 import { effectiveFeelings } from "../data/feelings.js";
 import { el, card, chip, fmtPct, fmtMs, weekBars } from "./components.js";
 
@@ -33,12 +33,15 @@ export async function renderStats({ container }) {
 
   const since = Date.now() - current * 86400000;
   const answers = await listAnswers({ sinceTs: since });
+  const allSessions = await listSessions();
+  const sessions = allSessions.filter((s) => (s.startedAt ?? 0) >= since);
   const sum = summarize(answers);
   const week = perDay(answers, Math.min(30, current));
   const streak = currentStreak(answers);
   const byMode = accuracyByMode(answers);
   const hardestStep = hardestByField(answers, "itemKey", 3);
   const strongStep = strongestByField(answers, "itemKey", 3);
+  const avgSec = avgSessionDurationSec(sessions);
 
   container.appendChild(el("div", { class: "grid-3" },
     statTile(fmtPct(sum.accuracy), "Точность"),
@@ -49,6 +52,11 @@ export async function renderStats({ container }) {
     statTile(String(sum.correct), "Правильно"),
     statTile(String(sum.wrong), "Ошибок"),
     statTile(String(streak), "Серия (дни)")
+  ));
+  container.appendChild(el("div", { class: "grid-3" },
+    statTile(fmtDurSec(avgSec), "Длительность сессии"),
+    statTile(String(sessions.length), "Сессий"),
+    statTile(fmtPct(sum.replayRate), "Использовал ▶")
   ));
 
   if (week.length) {
@@ -104,6 +112,14 @@ function statTile(v, k) {
     el("div", { class: "v", text: v }),
     el("div", { class: "k", text: k })
   );
+}
+
+function fmtDurSec(sec) {
+  if (sec == null) return "—";
+  if (sec < 60) return `${sec} с`;
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return s ? `${m}:${String(s).padStart(2, "0")}` : `${m} мин`;
 }
 
 function modeLabel(m) {

@@ -2,7 +2,7 @@
   "name": "Музыкальный тренажёр",
   "short_name": "Тренажёр",
   "description": "Тренажёр ступеней, аккордов и чувств для гитариста. A minor и C major.",
-  "id": "/music-trainer/",
+  "id": "/music/",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

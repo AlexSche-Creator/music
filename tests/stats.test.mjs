@@ -2,7 +2,8 @@
 import assert from "node:assert/strict";
 import {
   summarize, perDay, currentStreak, heatmap,
-  hardestByField, strongestByField, accuracyByMode, dayStart
+  hardestByField, strongestByField, accuracyByMode, dayStart,
+  avgSessionDurationSec
 } from "../js/core/stats.js";
 
 const DAY = 86400000;
@@ -93,6 +94,19 @@ t("dayStart zeros the time", () => {
   const dd = new Date(d);
   assert.equal(dd.getHours(), 0);
   assert.equal(dd.getMinutes(), 0);
+});
+
+t("avgSessionDurationSec averages valid sessions and skips bad ones", () => {
+  const sessions = [
+    { startedAt: NOW, finishedAt: NOW + 300_000 },         // 300s
+    { startedAt: NOW, finishedAt: NOW + 600_000 },         // 600s
+    { startedAt: NOW },                                     // missing finishedAt -> skipped
+    { startedAt: NOW + 1000, finishedAt: NOW },             // negative -> skipped
+    { startedAt: NOW, finishedAt: NOW + 4 * 60 * 60 * 1000 } // 4h outlier -> skipped
+  ];
+  assert.equal(avgSessionDurationSec(sessions), 450);
+  assert.equal(avgSessionDurationSec([]), null);
+  assert.equal(avgSessionDurationSec(null), null);
 });
 
 if (failed > 0) { console.error(`\n${failed} failed`); process.exit(1); }

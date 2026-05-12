@@ -49,14 +49,16 @@ node tests/scheduler.test.mjs
 
 ## Деплой на GitHub Pages
 
-1. Зайди в **Settings → Pages** в репозитории `music-trainer`.
+1. Зайди в **Settings → Pages** в репозитории `music`.
 2. Source: `Deploy from a branch`, ветка `main`, папка `/ (root)`.
 3. Дождись зелёного статуса.
-4. Приложение будет доступно по `https://<user>.github.io/music-trainer/` — открывается сразу, без подпапки.
+4. Приложение будет доступно по `https://<user>.github.io/music/` — открывается сразу, без подпапки.
+
+PNG-иконки PWA генерируются автоматически через GitHub Actions (`.github/workflows/icons.yml`) — при первом пуше в `main` экшен запускает `icons/generate.py` и докладывает иконки в репозиторий.
 
 ## Установка на iPhone как PWA
 
-1. Открой `https://<user>.github.io/music-trainer/` в **Safari** на iPhone.
+1. Открой `https://<user>.github.io/music/` в **Safari** на iPhone.
 2. Нажми кнопку «Поделиться» → **«На экран „Домой"»** → «Добавить».
 3. Запускай иконку с домашнего экрана — это и есть «установленное» приложение.
 4. Появятся системные права: при первой попытке включить уведомления Safari покажет диалог.
@@ -90,12 +92,12 @@ node tests/scheduler.test.mjs
 ## Архитектура
 
 ```
-music-trainer/
+music/
 ├── index.html              ← один HTML, ES-модули
 ├── manifest.webmanifest    ← PWA-манифест
 ├── service-worker.js       ← кэш shell + уведомления
 ├── styles.css              ← тёмная тема, Tiffany-акцент
-├── icons/                  ← PNG (192, 512, maskable, apple-touch) + SVG
+├── icons/                  ← PNG (авто-ген. CI) + SVG
 └── js/
     ├── main.js             ← точка входа, регистрация SW
     ├── router.js           ← hash-router
@@ -108,14 +110,14 @@ music-trainer/
     │   ├── audio.js        ← WebAudio (piano + plucked)
     │   ├── store.js        ← IndexedDB + export/import + clear
     │   ├── scheduler.js    ← weighted repetition
-    │   ├── stats.js        ← агрегаты, heatmap
+    │   ├── stats.js        ← агрегаты, heatmap, длительность сессии
     │   └── reminders.js    ← Web Notifications + .ics
     └── ui/                 ← экраны (по одному модулю на экран)
         ├── components.js   ← общие mini-компоненты (el, card, btn…)
-        ├── dashboard.js
+        ├── dashboard.js    ← «Мой музыкальный профиль» + недельный обзор
         ├── train-hub.js
         ├── training.js     ← главный игровой компонент (все режимы)
-        ├── tonalities.js
+        ├── tonalities.js   ← ступени с интервалами/функциями
         ├── progressions.js
         ├── stats.js
         └── settings.js
@@ -123,6 +125,7 @@ tests/                       ← node-тесты ESM
 ├── theory.test.mjs
 ├── stats.test.mjs
 └── scheduler.test.mjs
+.github/workflows/icons.yml  ← авто-генерация PNG-иконок через Pillow
 ```
 
 ### Поток данных
@@ -139,7 +142,7 @@ tests/                       ← node-тесты ESM
 ## Что протестировано
 
 - `theory.js`: парсинг аккордов, MIDI-ноты, ступень↔аккорд, генерация опций, угадывание следующего аккорда.
-- `stats.js`: точность, perDay, streak, heatmap, hardest/strongest, by-mode.
+- `stats.js`: точность, perDay, streak, heatmap, hardest/strongest, by-mode, средняя длительность сессии.
 - `scheduler.js`: EMA, weighted pick, anti-repeat, hardestItems, improvedItems.
 - Smoke-test статики: все ресурсы отдаются HTTP 200.
 
@@ -160,17 +163,20 @@ tests/                       ← node-тесты ESM
 3. **Один большой `training.js`.** Все 9 режимов делят один UI-конвейер, чтобы переключение между ними было бесшовным. Альтернатива — модуль на каждый режим — давала бы 9 почти одинаковых файлов.
 4. **Hash-router вместо History API.** Hash-маршруты ломаются меньше при размещении в подпапке GitHub Pages.
 5. **Feelings хранятся per-tonality.** Один и тот же аккорд (например C) играет разную функциональную роль в C major и в A minor, поэтому ассоциации логично различать.
+6. **PNG-иконки генерируются в CI.** Бинарники не любят ручных коммитов; SVG и generate.py в репо дают воспроизводимый источник, экшен докладывает PNG.
 
 ## Что готово
 
 - ✅ Полный UI: главная, тренировка, тональности, прогрессии, статистика, настройки.
+- ✅ «Мой музыкальный профиль» + карточка «За неделю стало лучше» (improvedItems).
 - ✅ Аудио: piano + plucked, аккорды, арпеджио, последовательности.
 - ✅ Хранилище: IndexedDB + fallback, экспорт/импорт.
 - ✅ Алгоритм подбора заданий: weighted repetition + anti-repeat.
-- ✅ Статистика: день / неделя / месяц / год, heatmap.
+- ✅ Статистика: день / неделя / месяц / год, heatmap, длительность сессии.
 - ✅ PWA: manifest, service worker, офлайн.
-- ✅ Тесты: 23+ assert'а в трёх файлах.
+- ✅ Тесты: 24+ assert'а в трёх файлах.
 - ✅ Напоминания: Web Notifications + .ics.
+- ✅ PNG-иконки: генерируются автоматически через GitHub Actions.
 
 ## Лицензия
 

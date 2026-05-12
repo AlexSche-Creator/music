@@ -125,6 +125,20 @@ export function strongestByField(answers, field, n = 3) {
   return rows.slice(0, n);
 }
 
+/** Average session duration in seconds, from session records with both
+ *  `startedAt` and `finishedAt`. Returns null if no finished sessions exist. */
+export function avgSessionDurationSec(sessions) {
+  if (!Array.isArray(sessions)) return null;
+  let total = 0, n = 0;
+  for (const s of sessions) {
+    if (!s || typeof s.startedAt !== "number" || typeof s.finishedAt !== "number") continue;
+    const dur = (s.finishedAt - s.startedAt) / 1000;
+    if (dur <= 0 || dur > 3 * 60 * 60) continue; // skip negatives and absurd outliers
+    total += dur; n += 1;
+  }
+  return n ? Math.round(total / n) : null;
+}
+
 /** Accuracy by mode, useful for "memory retention by mode". */
 export function accuracyByMode(answers) {
   const m = new Map();

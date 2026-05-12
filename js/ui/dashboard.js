@@ -1,6 +1,7 @@
 import { TONALITIES } from "../data/tonalities.js";
 import { kvGet, listAnswers } from "../core/store.js";
 import { perDay, summarize, currentStreak, accuracyByMode, hardestByField, strongestByField } from "../core/stats.js";
+import { improvedItems } from "../core/scheduler.js";
 import { effectiveFeelings } from "../data/feelings.js";
 import { el, card, btn, greet, fmtPct, weekBars, chip } from "./components.js";
 
@@ -28,6 +29,8 @@ export async function renderDashboard({ container }) {
   const hardest = hardestByField(last30, "itemKey", 1)[0];
 
   const feelings = effectiveFeelings(await kvGet("feelings_overrides"));
+  const weights = (await kvGet("weights")) || {};
+  const improved = improvedItems(weights, last7, 3);
 
   // Streak pill
   const streakPill = document.getElementById("streakPill");
@@ -80,6 +83,20 @@ export async function renderDashboard({ container }) {
       text: "Тренажёр учится с тобой: чаще покажет то, что путаешь, и мягко поднимет на ноги слабые места." })
   );
   container.appendChild(card(profile));
+
+  // Weekly "what you started recognising better"
+  if (improved.length) {
+    const improvedCard = el("div", { class: "col" },
+      el("h2", { text: "За неделю стало лучше" }),
+      ...improved.map((r) => el("div", { class: "row between" },
+        el("div", { text: humanizeItemKey(r.itemKey, feelings) }),
+        chip(`+${Math.round(r.improvement * 100)}%`, true)
+      )),
+      el("p", { class: "muted",
+        text: "Это аккорды и ступени, которые на этой неделе ты узнаёшь увереннее, чем за всё время." })
+    );
+    container.appendChild(card(improvedCard));
+  }
 
   // Quick links to other screens
   container.appendChild(el("div", { class: "grid-2" },

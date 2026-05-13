@@ -15,6 +15,49 @@ let ctx = null;
 let masterGain = null;
 let currentTimbre = "piano";
 let activeStops = []; // functions that stop currently-playing voices
+let silentEl = null;   // HTMLAudioElement looping silence; defeats iOS silent switch
+let silentPlaying = false;
+
+/* 0.1 s of 8 kHz / 8-bit / mono silence (845 bytes uncompressed -> ~1.1 KB base64).
+ * iOS Safari silences Web Audio output whenever the physical mute / ring switch
+ * is engaged — even if the system volume is up. The documented workaround is
+ * to play an HTMLAudioElement on the page: this flips the WebKit audio session
+ * from "ambient" to "media playback", after which Web Audio respects the
+ * volume slider regardless of the switch. We attach a hidden <audio> tag with
+ * a tiny silent WAV looping forever and call play() from inside a real user
+ * gesture. The element stays alive for the lifetime of the page. */
+const SILENT_WAV = "data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";
+
+function ensureSilentEl() {
+  if (silentEl) return silentEl;
+  if (typeof document === "undefined") return null;
+  const el = document.createElement("audio");
+  el.setAttribute("playsinline", "");
+  el.setAttribute("webkit-playsinline", "");
+  el.setAttribute("aria-hidden", "true");
+  el.preload = "auto";
+  el.loop = true;
+  el.src = SILENT_WAV;
+  el.style.cssText = "position:absolute;width:0;height:0;left:-9999px;top:0;opacity:0;pointer-events:none;";
+  if (document.body) document.body.appendChild(el);
+  else document.addEventListener("DOMContentLoaded", () => document.body.appendChild(el), { once: true });
+  silentEl = el;
+  return el;
+}
+
+async function defeatIOSSilentSwitch() {
+  if (silentPlaying) return;
+  const el = ensureSilentEl();
+  if (!el) return;
+  try {
+    el.currentTime = 0;
+    const p = el.play();
+    if (p && typeof p.then === "function") await p;
+    silentPlaying = true;
+  } catch {
+    /* play() promise rejects until the next gesture — that's fine, we retry. */
+  }
+}
 
 /** Lazily create the AudioContext on first user gesture. Safe to call any time. */
 export function ensureCtx() {
@@ -23,17 +66,19 @@ export function ensureCtx() {
   if (!AC) return null;
   ctx = new AC();
   masterGain = ctx.createGain();
-  masterGain.gain.value = 0.18;
+  masterGain.gain.value = 0.6;
   masterGain.connect(ctx.destination);
   return ctx;
 }
 
-/** Resume the context if suspended (call from a user-gesture handler). */
+/** Resume the context if suspended AND defeat iOS silent switch.
+ *  Call from a user-gesture handler for it to actually take effect. */
 export async function unlock() {
   const c = ensureCtx();
   if (c && c.state === "suspended") {
     try { await c.resume(); } catch {}
   }
+  await defeatIOSSilentSwitch();
   return c;
 }
 

@@ -2,7 +2,7 @@
  * Strategy: cache-first for app shell, network-first for everything else.
  * Bump CACHE_VERSION whenever the shell changes.
  */
-const CACHE_VERSION = "music-trainer-v5";
+const CACHE_VERSION = "music-trainer-v6";
 const SHELL = [
   "./",
   "./index.html",
@@ -24,6 +24,11 @@ const SHELL = [
   "./js/core/scheduler.js",
   "./js/core/stats.js",
   "./js/core/reminders.js",
+  "./js/core/concept.js",
+  "./js/core/learning.js",
+  "./js/core/session-planner.js",
+  "./js/core/recommend.js",
+  "./js/core/question.js",
   "./js/ui/components.js",
   "./js/ui/dashboard.js",
   "./js/ui/train-hub.js",

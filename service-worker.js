@@ -2,7 +2,7 @@
  * Strategy: cache-first for app shell, network-first for everything else.
  * Bump CACHE_VERSION whenever the shell changes.
  */
-const CACHE_VERSION = "music-trainer-v7";
+const CACHE_VERSION = "music-trainer-v8";
 const SHELL = [
   "./",
   "./index.html",
@@ -19,6 +19,8 @@ const SHELL = [
   "./js/data/progressions.js",
   "./js/data/feelings.js",
   "./js/data/keys-roster.js",
+  "./js/data/pentatonic.js",
+  "./js/data/shapes.js",
   "./js/core/theory.js",
   "./js/core/audio.js",
   "./js/core/store.js",
@@ -35,6 +37,8 @@ const SHELL = [
   "./js/core/templates.js",
   "./js/core/recovery.js",
   "./js/core/settings-schema.js",
+  "./js/core/rotation.js",
+  "./js/core/ics.js",
   "./js/ui/components.js",
   "./js/ui/practice-home.js",
   "./js/ui/train-hub.js",
@@ -42,7 +46,14 @@ const SHELL = [
   "./js/ui/tonalities.js",
   "./js/ui/progressions.js",
   "./js/ui/stats.js",
-  "./js/ui/settings.js"
+  "./js/ui/settings.js",
+  "./js/ui/practice/improv.js",
+  "./js/ui/practice/covers.js",
+  "./js/ui/practice/shapes.js",
+  "./js/ui/practice/keys.js",
+  "./js/ui/practice/schedule.js",
+  "./js/ui/practice/habits.js",
+  "./js/ui/practice/purple.js"
 ];
 
 self.addEventListener("install", (event) => {

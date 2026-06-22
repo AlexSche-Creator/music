@@ -31,7 +31,14 @@ export function toast(msg, ms = 1800) {
 }
 
 export function card(content, opts = {}) {
-  return el("div", { class: `card${opts.elev ? " elev2" : ""}${opts.accent ? " accent" : ""}${opts.tap ? " tap" : ""}`, ...opts.attrs }, content);
+  const cls = [
+    "card",
+    opts.elev ? "elev2" : "",
+    opts.accent ? "accent" : "",
+    opts.tap ? "tap" : "",
+    opts.practiceAccent ? "practice" : "",
+  ].filter(Boolean).join(" ");
+  return el("div", { class: cls, ...opts.attrs }, content);
 }
 
 export function progressBar(pct) {
@@ -43,11 +50,19 @@ export function chip(text, accent = false) {
 }
 
 export function btn(label, onClick, opts = {}) {
+  const cls = [
+    "btn",
+    opts.primary ? "primary" : "",
+    opts.ghost ? "ghost" : "",
+    opts.full ? "full" : "",
+    opts.small ? "small" : "",
+    opts.practiceAccent ? "practice" : "",
+  ].filter(Boolean).join(" ");
   return el("button", {
-    class: `btn${opts.primary ? " primary" : ""}${opts.ghost ? " ghost" : ""}${opts.full ? " full" : ""}${opts.small ? " small" : ""}`,
+    class: cls,
     onClick,
     type: "button",
-    ...(opts.attrs || {})
+    ...(opts.attrs || {}),
   }, label);
 }
 

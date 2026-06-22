@@ -3,7 +3,7 @@
  */
 
 import { route, start, render } from "./router.js";
-import { renderDashboard } from "./ui/dashboard.js";
+import { renderPracticeHome } from "./ui/practice-home.js";
 import { renderTrainHub } from "./ui/train-hub.js";
 import { renderTraining } from "./ui/training.js";
 import { renderTonalities } from "./ui/tonalities.js";
@@ -13,8 +13,13 @@ import { renderSettings } from "./ui/settings.js";
 import { kvGet } from "./core/store.js";
 import { scheduleLocalReminders, permission } from "./core/reminders.js";
 import { setTimbre, unlock } from "./core/audio.js";
+import { mergeSettings } from "./core/settings-schema.js";
 
-route("/dashboard",    renderDashboard);
+// Phase 1: the bottom nav has 3 tabs (Главная / Статистика / Настройки).
+// Old #/dashboard route now resolves to the new practice-home aggregator.
+// Old #/train, #/tonalities, #/progressions are still reachable from cards
+// on the new Главная, just no longer pinned to the bottom bar.
+route("/dashboard",    renderPracticeHome);
 route("/train",        renderTrainHub);
 route("/train/run",    renderTraining);
 route("/tonalities",   renderTonalities);
@@ -40,10 +45,11 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-/* Apply persisted timbre and arm reminders on boot. */
+/* Apply persisted timbre and arm reminders on boot.
+ * Use the schema merger so old flat-shape settings are migrated transparently. */
 (async () => {
-  const settings = (await kvGet("settings")) || {};
-  if (settings.timbre) setTimbre(settings.timbre);
+  const settings = mergeSettings(await kvGet("settings"));
+  if (settings.general && settings.general.timbre) setTimbre(settings.general.timbre);
   if (permission() === "granted" && Array.isArray(settings.reminders) && settings.reminders.length) {
     scheduleLocalReminders(settings.reminders);
   }

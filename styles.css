@@ -9,9 +9,12 @@
   --fg: #f5f5f5;
   --fg-dim: rgba(245,245,245,0.62);
   --fg-faint: rgba(245,245,245,0.36);
-  --accent: #0ABAB5;            /* Tiffany */
+  --accent: #0ABAB5;            /* Tiffany — старые модули (тренажёр, тональности, прогрессии) */
   --accent-soft: rgba(10,186,181,0.18);
   --accent-glow: rgba(10,186,181,0.35);
+  --accent-practice: #7C5CFF;   /* Pantone-like purple — новые модули практики */
+  --accent-practice-soft: rgba(124,92,255,0.18);
+  --accent-practice-glow: rgba(124,92,255,0.35);
   --ok: #0ABAB5;
   --bad: #ff5d6c;
   --radius: 18px;
@@ -144,6 +147,21 @@ p { margin: 0; line-height: 1.4; color: var(--fg-dim); }
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent), 0 8px 30px var(--accent-glow);
 }
+.card.practice {
+  border-color: var(--accent-practice-soft);
+  background: linear-gradient(180deg, rgba(124,92,255,0.06), var(--bg-elev) 28%);
+}
+.card.practice.tap:hover { border-color: var(--accent-practice); }
+.card.practice.accent {
+  border-color: var(--accent-practice);
+  box-shadow: 0 0 0 1px var(--accent-practice), 0 8px 30px var(--accent-practice-glow);
+}
+.btn.primary.practice {
+  background: var(--accent-practice);
+  color: #1a0033;
+  border-color: var(--accent-practice);
+}
+.btn.primary.practice:active { background: #6d4cf2; }
 
 .row { display: flex; gap: 12px; align-items: center; }
 .row.between { justify-content: space-between; }

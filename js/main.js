@@ -10,6 +10,13 @@ import { renderTonalities } from "./ui/tonalities.js";
 import { renderProgressions } from "./ui/progressions.js";
 import { renderStats } from "./ui/stats.js";
 import { renderSettings } from "./ui/settings.js";
+import { renderImprov } from "./ui/practice/improv.js";
+import { renderCovers } from "./ui/practice/covers.js";
+import { renderShapes } from "./ui/practice/shapes.js";
+import { renderKeys } from "./ui/practice/keys.js";
+import { renderSchedule } from "./ui/practice/schedule.js";
+import { renderHabits } from "./ui/practice/habits.js";
+import { renderPurple } from "./ui/practice/purple.js";
 import { kvGet } from "./core/store.js";
 import { scheduleLocalReminders, permission } from "./core/reminders.js";
 import { setTimbre, unlock } from "./core/audio.js";
@@ -19,13 +26,20 @@ import { mergeSettings } from "./core/settings-schema.js";
 // Old #/dashboard route now resolves to the new practice-home aggregator.
 // Old #/train, #/tonalities, #/progressions are still reachable from cards
 // on the new Главная, just no longer pinned to the bottom bar.
-route("/dashboard",    renderPracticeHome);
-route("/train",        renderTrainHub);
-route("/train/run",    renderTraining);
-route("/tonalities",   renderTonalities);
-route("/progressions", renderProgressions);
-route("/stats",        renderStats);
-route("/settings",     renderSettings);
+route("/dashboard",        renderPracticeHome);
+route("/train",            renderTrainHub);
+route("/train/run",        renderTraining);
+route("/tonalities",       renderTonalities);
+route("/progressions",     renderProgressions);
+route("/stats",            renderStats);
+route("/settings",         renderSettings);
+route("/practice/improv",   renderImprov);
+route("/practice/covers",   renderCovers);
+route("/practice/shapes",   renderShapes);
+route("/practice/keys",     renderKeys);
+route("/practice/schedule", renderSchedule);
+route("/practice/habits",   renderHabits);
+route("/practice/purple",   renderPurple);
 
 start();
 

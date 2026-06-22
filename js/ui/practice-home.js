@@ -23,7 +23,7 @@ import { conceptToHumanLabel } from "../core/concept.js";
 import { el, card, btn, chip, greet, fmtPct } from "./components.js";
 
 /* Module catalog: order, names, icons (text), target route, "ready" flag.
- * "ready: false" cards render as "Скоро" — Phase 2-5 will flip these. */
+ * "ready: true" cards render as "Скоро" — Phase 2-5 will flip these. */
 const MODULE_CARDS = [
   {
     id: "theory", icon: "♬", title: "Теория и слух",
@@ -33,37 +33,37 @@ const MODULE_CARDS = [
   {
     id: "improv", icon: "🎼", title: "Импровизация",
     desc: "Пентатоника. 3/5/10 минут с аккомпанементом.",
-    route: "#/practice/improv", ready: false,
+    route: "#/practice/improv", ready: true,
   },
   {
     id: "cover", icon: "🎤", title: "Кавер дня",
     desc: "Один трек. Chordify, таймер, опц. микрофон.",
-    route: "#/practice/covers", ready: false,
+    route: "#/practice/covers", ready: true,
   },
   {
     id: "shapes", icon: "✋", title: "Аппликатуры",
     desc: "Альтернативные позиции аккордов, расширения (maj7, m7, sus…).",
-    route: "#/practice/shapes", ready: false,
+    route: "#/practice/shapes", ready: true,
   },
   {
     id: "newKeys", icon: "🌍", title: "Новые тональности",
     desc: "Выход из A minor / C major. Ротация и любимые тональности.",
-    route: "#/practice/keys", ready: false,
+    route: "#/practice/keys", ready: true,
   },
   {
     id: "schedule", icon: "📅", title: "Расписание",
     desc: "Когда заниматься, .ics для Календаря.",
-    route: "#/practice/schedule", ready: false,
+    route: "#/practice/schedule", ready: true,
   },
   {
     id: "habits", icon: "📈", title: "Привычки",
     desc: "Streaks, heatmap, Practice Score за период.",
-    route: "#/practice/habits", ready: false,
+    route: "#/practice/habits", ready: true,
   },
   {
     id: "purpleMode", icon: "🟣", title: "Purple Mode",
     desc: "Deep mode: интервал → ступень → аккорд → тип.",
-    route: "#/practice/purple", ready: false,
+    route: "#/practice/purple", ready: true,
   },
 ];
 
@@ -179,7 +179,10 @@ function moduleCard(meta, snap, breakdown, health) {
   if (status && status.done) {
     footer = chip(`✓ Сегодня · +${score.pts || 0}`, true);
   } else if (meta.ready) {
-    footer = chip(`Не было${h.daysSinceLast >= 1 ? ` (${h.daysSinceLast} дн.)` : ""}`, false);
+    const days = h.daysSinceLast;
+    if (days == null || days >= 90) footer = chip("Открыть", false);
+    else if (days <= 0) footer = chip("Готов сегодня", false);
+    else footer = chip(`${days} дн. назад`, false);
   } else {
     footer = chip("Скоро", false);
   }
